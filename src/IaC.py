@@ -3,6 +3,8 @@ import boto3
 import json
 import psycopg2
 from pathlib import Path
+import botocore.exceptions
+
 
 # récupération des paramètres de configuration dans le fichier config.cfg
 
@@ -48,21 +50,25 @@ class IaC:
     def create_bucket(self) : 
         
         """ this function is used to create a bucket"""
-        try :
+        try: 
             self._s3.create_bucket(Bucket='ghiles-data-foot', CreateBucketConfiguration={'LocationConstraint': 'eu-west-3'} )
-
-        except Exception as e: 
-            print('Bucket already exist')
+            
+        except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
+            error_code = e.response['Error']['Code']
+            if error_code == 'BucketAlreadyOwnedByYou':
+                # Traitement de l'erreur
+                print("Le bucket existe déjà et vous en êtes propriétaire.")
             pass
+            
+
             
     def create_cluster(self) : 
         
         """ this function is used to create a cluster"""
         
         # création d'un role IAM pour accéder à Redshift
+        try : 
 
-        try:
-            
             print("1.1 Creating a new IAM Role") 
             self._iam.create_role(
                 Path='/',
@@ -73,22 +79,27 @@ class IaC:
                     'Effect': 'Allow',
                     'Principal': {'Service': 'redshift.amazonaws.com'}}],
                     'Version': '2012-10-17'})
-            )    
+                )    
+        except Exception as e : 
+            pass
+                
+            print("1.2 Attaching Policy")
+
+        try : 
+            self._iam.attach_role_policy(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"),
+                                PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+                                )
+
+            print("1.3 Get the IAM role ARN")
+            roleArn = self._iam.get_role(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"))['Role']['Arn']
             
-        except Exception as e:
-            print(e)
+        except Exception as e : 
+            pass
+
+    # création du cluster Redshift 
+    
+        try : 
             
-        print("1.2 Attaching Policy")
-
-        self._iam.attach_role_policy(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"),
-                            PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-                            )
-
-        print("1.3 Get the IAM role ARN")
-        roleArn = self._iam.get_role(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"))['Role']['Arn']
-
-        # création du cluster Redshift 
-        try:
             self._redshift.create_cluster(        
                 
                 ClusterType=config.get("DWH","DWH_CLUSTER_TYPE"),
@@ -103,19 +114,26 @@ class IaC:
                 
                 #Roles (for s3 access)
                 IamRoles=[roleArn]  
-            )
-        except Exception as e:
+                )
+            
+        except Exception as e :
+            
+            print('erreur lors de la création du cluster')
             print(e)
+            
+                
 
     def open_port(self) : 
         
         """ this function is used to open the port 5439 to access the cluster"""
         
         # ouverture du port 5439 pour accéder au cluster
-        try:
+        try : 
             
+            self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
             vpc = self._ec2.Vpc(id = self._myClusterProps['VpcId'])
             defaultSg = list(vpc.security_groups.all())[0]
+            
             print(defaultSg)
             defaultSg.authorize_ingress(
                 GroupName=defaultSg.group_name,
@@ -124,14 +142,15 @@ class IaC:
                 FromPort=int(config.get("DWH","DWH_PORT")),
                 ToPort=int(config.get("DWH","DWH_PORT"))
             )
-        except Exception as e:
+
+        except  Exception as e :
             print(e)
+            pass
 
     # s'assurer que le cluster est bien créé 
     def verify_cluster_status(self ): 
         
         """ this function is used to verify the status of the cluster """
-        
         self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
         DWH_ENDPOINT = self._myClusterProps['Endpoint']['Address']
         
