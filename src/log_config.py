@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 
-
 if not os.path.exists("src/log/"):
     os.mkdir("src/log/") 
 

@@ -1,9 +1,10 @@
 import configparser
 from pathlib import Path
 import log_config
-from IaC import IaC 
 from pyspark.ml.feature import StopWordsRemover
-from pyspark.sql.functions import regexp_replace, split, substring, lower,regexp_replace
+from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_timestamp, current_timestamp
+import extract 
+from pyspark.sql import SparkSession
 
 # récupération des paramètres de configuration dans le fichier config.cfg
 config = configparser.ConfigParser()
@@ -19,6 +20,7 @@ class Transform :
         self._spark = spark
         self._load_path = "s3://ghiles-data-foot/raw_data"
         self._save_path = "s3://ghiles-data-foot/processed_data"
+
 
     def transform_tweet_info(self) : 
         
@@ -43,14 +45,66 @@ class Transform :
         # Séparation de la colonne date et heure en deux colonnes
         tweet_df = tweet_df.withColumn("date", substring(tweet_df["date_creation"], 0, 10)) \
             .withColumn("time", substring(tweet_df["date_creation"], 11, 19))
-            
+        
+        # Transformation de la colonne "date" en format de date
+        tweet_df = tweet_df.withColumn("date", to_date(tweet_df["date"], "yyyy-MM-dd"))
+
+        # Transformation de la colonne "time" en format d'heure
+        tweet_df = tweet_df.withColumn("time", to_timestamp(tweet_df["time"], "HH:mm:ss"))
+        
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
-        # Enregistrement du DataFrame au format Parquet sur S3 avec compression Snappy, partitionnement sur la colonne "date" et 8 tâches
-        tweet_df.write.parquet( self._save_path + "TWEET_DF", mode="overwrite", compression="snappy", partitionBy=["date"]) 
+        # Enregistrement du DataFrame au format Parquet sur S3 
+        tweet_df.write.parquet( self._save_path + "/TWEET_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"]) 
         
+        logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué") 
+          
+            
+    def transform_user_info(self, user) : 
+        
+        """ transformation du fichier USER_INFO.csv """
+        
+        # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
+        user_df = self._spark.read.csv( self._load_path + '/TWEET_INFO.csv', header=True, inferSchema=True) 
+        user_activity = self._spark.read.csv( self._load_path + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
+           
+        # transformation date
+        user_df = user_df.withColumn("date_creation", substring(user_df["date_creation"], 0, 10))
+        user_df = user_df.withColumn("date_creation", to_date(user_df["date_creation"], "yyyy-MM-dd"))
+        
+        # ajouter la date du jour afin de faciliter le suivi des utilisateurs
+        user_df = user_df.withColumn("date", to_date(current_timestamp())) 
+                
+        # join des deux dataframes 
+        user_df = user_df.withColumn("favorite_count", user_activity["favorite_count"])
+        user_df = user_df.withColumn("retweet_count", user_activity["retweet_count"])
+        
+        # ajout colonne user 
+        user_df = user_df.withColumn("user", user._user_name)
+        
+        logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
+        
+        #enregistrement du dataframe au format parquet sur S3 
+        user_df.write.parquet( self._save_path + "/USER_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"])
+        
+        logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué")
+        
+if __name__ == "__main__" : 
     
-        
-        
-        
-        
+    spark = SparkSession.builder.appName('data_film').getOrCreate()
+
+    # instanciation de la classe Transform
+    transform = Transform(spark)
+    
+    # instanciation de la classe Extract
+    extract = extract.Extract()
+    
+    # chargement des données depuis S3 
+    extract.load_data()
+    
+    # transformation des données 
+    transform.transform_tweet_info()
+    transform.transform_user_info(extract._user)
+    
+    # suppression des données du bucket S3
+    extract.delete_data()
