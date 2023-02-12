@@ -50,6 +50,8 @@ class IaC:
         
         self._myClusterProps = None
         
+        self._bucket_name = "ghiles-data-foot" 
+        
         logger.debug("cration des clients pour accéder aux services AWS")
 
     # création d'une bucket afin de stocker les données 
@@ -57,10 +59,10 @@ class IaC:
         
         """ this function is used to create a bucket"""
         try: 
-            self._s3.create_bucket(Bucket='ghiles-data-foot', CreateBucketConfiguration={'LocationConstraint': 'eu-west-3'} )
+            self._s3.create_bucket(Bucket=self._bucket_name, CreateBucketConfiguration={'LocationConstraint': 'eu-west-3'} )
             
-        except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as e:
-            error_code = e.response['Error']['Code']
+        except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as E:
+            error_code = E.response['Error']['Code']
             if error_code == 'BucketAlreadyOwnedByYou':
                 # Traitement de l'erreur
                 print("Le bucket existe déjà et vous en êtes propriétaire.")
@@ -160,6 +162,7 @@ class IaC:
     def verify_cluster_status(self ): 
         
         """ this function is used to verify the status of the cluster """
+        
         self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
         DWH_ENDPOINT = self._myClusterProps['Endpoint']['Address']
         
@@ -180,6 +183,13 @@ class IaC:
         conn.close()
         logger.debug(f" {cursor.fetchone()}")
         logger.debug("test ok")
+
+    def clean_bucket(self):
+        """
+        Clean the bucket
+        """
+        logger.debug(f"Cleaning bucket : {self._bucket_name }")
+        self._s3.Bucket(self._bucket_name ).objects.all().delete()
 
 if __name__ == '__main__' : 
     
