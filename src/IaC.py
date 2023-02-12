@@ -17,6 +17,8 @@ config.read_file(open(f"{Path(__file__).parent}/config.cfg"))
 
 class IaC:
 
+    """ this class is used to create the infrastructure as code"""
+    
     def __init__(self) -> None:
         
         # Création des clients pour accéder aux services AWS
@@ -46,6 +48,14 @@ class IaC:
                         region_name="eu-west-3",
                         aws_access_key_id=self.KEY,
                         aws_secret_access_key=self.SECRET
+                        )
+        
+        # Créer un client EMR
+        self._emr = boto3.client(
+                        'emr',
+                        aws_access_key_id=self.KEY,
+                        aws_secret_access_key=self.SECRET,
+                        region_name="eu-west-3",
                         )
         
         self._myClusterProps = None
@@ -183,6 +193,7 @@ class IaC:
         conn.close()
         logger.debug(f" {cursor.fetchone()}")
         logger.debug("test ok")
+        
 
     def clean_bucket(self):
         """
@@ -194,10 +205,9 @@ class IaC:
 if __name__ == '__main__' : 
     
     iac = IaC()
-    iac.create_bucket()
-    iac.create_cluster()
-    iac.open_port()
-    iac.verify_cluster_status()
-    
+    # iac.create_bucket()
+    # iac.create_cluster()
+    # iac.open_port()
+    # iac.verify_cluster_status()
     
     

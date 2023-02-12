@@ -186,8 +186,6 @@ class Extract :
         # upload the file to S3
         s3._s3.Bucket( s3._bucket_name ).put_object(Key=table_name + '.csv', Body=csv_file.getvalue().encode('UTF-8'))
         logger.debug("upload csv file to s3 for user infos for user activity")
-
-
       
 if __name__ == '__main__' : 
     
