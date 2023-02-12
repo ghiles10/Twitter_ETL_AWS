@@ -67,9 +67,10 @@ class IaC:
     # création d'une bucket afin de stocker les données 
     def create_bucket(self) : 
         
-        """ this function is used to create a bucket"""
+        """ this function is used to create buckets needed for the project"""
         try: 
-            self._s3.create_bucket(Bucket=self._bucket_name, CreateBucketConfiguration={'LocationConstraint': 'eu-west-3'} )
+            self._s3.create_bucket(Bucket=self._bucket_name , CreateBucketConfiguration={'LocationConstraint': 'eu-west-3'} )
+         
             
         except (botocore.exceptions.BotoCoreError, botocore.exceptions.ClientError) as E:
             error_code = E.response['Error']['Code']
@@ -101,7 +102,6 @@ class IaC:
         except Exception as e : 
             pass
                 
-
         try : 
             self._iam.attach_role_policy(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"),
                                 PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
@@ -110,7 +110,6 @@ class IaC:
             
             roleArn = self._iam.get_role(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"))['Role']['Arn']
             logger.debug("Get the IAM role ARN")
-            
             
         except Exception as e : 
             pass
