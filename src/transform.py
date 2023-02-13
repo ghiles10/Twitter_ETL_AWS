@@ -6,7 +6,7 @@ import extract
 from pyspark.sql import SparkSession
 import os 
 from IaC import IaC
-
+import shutil
 
 # creating folder for storign data
 if not os.path.exists("src/data"):
@@ -69,7 +69,8 @@ class Transform :
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
         # Enregistrement du DataFrame csv
-        tweet_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
+        tweet_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/tweet.csv", index=False)
+        # tweet_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
         
         logger.debug("Enregistrement du DataFrame tweet au format csv effectué") 
           
@@ -105,7 +106,8 @@ class Transform :
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format csv
-        user_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/user", sep = ',', header=True, mode ="overwrite" )
+        user_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/user.csv", index=False)
+        # user_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/user", sep = ',', header=True, mode ="overwrite" )
         
         logger.debug("Enregistrement du DataFrame au format user csv  effectué")
         
@@ -115,17 +117,23 @@ class Transform :
         """ this function is used to send the processed data to s3 """
         
         csv_files = []
-        for root, _, files in os.walk(f"{Path(__file__).parent}/data/processed_data"):
+        for _, _, files in os.walk(f"{Path(__file__).parent}/data/processed_data"):
             for file in files:
                 if file.endswith(".csv"):
-                    csv_files.append(os.path.join(root, file))
-        
+                    csv_files.append(file)
+                          
         # upload the file to S3
         for file in csv_files: 
-            iac._s3.Bucket( iac._bucket_name ).put_object(Key="processed_data/" + file, Body=open(file, 'rb'))
+            iac._s3.Bucket( iac._bucket_name ).put_object(Key="processed_data/" + file, Body=open(f"{Path(__file__).parent}/data/processed_data/" + file, 'rb'))
             
             logger.debug(f"upload {file} file to s3 for user infos")
 
+
+    def delete_data(self) : 
+        
+        """ this function is used to delete the data local """
+        
+        shutil.rmtree(f"{Path(__file__).parent}/data")
         
 if __name__ == "__main__" : 
     
