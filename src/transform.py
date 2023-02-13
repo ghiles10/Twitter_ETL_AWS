@@ -91,7 +91,11 @@ class Transform :
         
 if __name__ == "__main__" : 
     
-    spark = SparkSession.builder.appName('data_film').getOrCreate()
+    spark = SparkSession.builder \
+    .appName("ReadFromS3") \
+    .config("spark.hadoop.aws.access.key", config.get('AWS','ACCESS')) \
+    .config("spark.hadoop.aws.secret.key", config.get('AWS','KEY')) \
+    .getOrCreate()
 
     # instanciation de la classe Transform
     transform = Transform(spark)
@@ -99,12 +103,6 @@ if __name__ == "__main__" :
     # instanciation de la classe Extract
     extract = extract.Extract()
     
-    # chargement des données depuis S3 
-    extract.load_data()
-    
     # transformation des données 
     transform.transform_tweet_info()
     transform.transform_user_info(extract._user)
-    
-    # suppression des données du bucket S3
-    extract.delete_data()
