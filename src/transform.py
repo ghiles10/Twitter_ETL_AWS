@@ -5,6 +5,10 @@ from pyspark.ml.feature import StopWordsRemover
 from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_timestamp, current_timestamp
 import extract 
 from pyspark.sql import SparkSession
+import os 
+
+if not os.path.exists("src/data"):
+    os.mkdir("src/data")
 
 # récupération des paramètres de configuration dans le fichier config.cfg
 config = configparser.ConfigParser()
@@ -20,14 +24,16 @@ class Transform :
         self._spark = spark
         self._load_path = "s3://ghiles-data-foot/raw_data"
         self._save_path = "s3://ghiles-data-foot/processed_data"
-
-
+    
+    def download_data(self,s3) :   
+        
+    
     def transform_tweet_info(self) : 
         
         """  transformation du fichier TWEET_INFO.csv  """
         
         # chargement du fichier TWEET_INFO.csv et suppression des caractères spéciaux
-        tweet_df = self._spark.read.csv( self._load_path + '/TWEET_INFO.csv', header=True,inferSchema=True)
+        tweet_df = self._spark.read.csv( "src/data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "[^a-zA-Z\\s]", "")) \
                .withColumn("text", regexp_replace("text", "^@\\w+", ""))
         
@@ -55,7 +61,7 @@ class Transform :
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
         # Enregistrement du DataFrame au format Parquet sur S3 
-        tweet_df.write.parquet( self._save_path + "/TWEET_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"]) 
+        tweet_df.write.parquet( "src/data/TWEET_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"]) 
         
         logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué") 
           
@@ -64,8 +70,9 @@ class Transform :
         
         """ transformation du fichier USER_INFO.csv """
         
+        
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
-        user_df = self._spark.read.csv( self._load_path + '/TWEET_INFO.csv', header=True, inferSchema=True) 
+        user_df = self._spark.read.csv( "src/data" + '/TWEET_INFO.csv', header=True, inferSchema=True) 
         user_activity = self._spark.read.csv( self._load_path + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
            
         # transformation date
@@ -85,17 +92,13 @@ class Transform :
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format parquet sur S3 
-        user_df.write.parquet( self._save_path + "/USER_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"])
+        user_df.write.parquet( "src/data/USER_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"])
         
         logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué")
         
 if __name__ == "__main__" : 
     
-    spark = SparkSession.builder \
-    .appName("ReadFromS3") \
-    .config("spark.hadoop.aws.access.key", config.get('AWS','ACCESS')) \
-    .config("spark.hadoop.aws.secret.key", config.get('AWS','KEY')) \
-    .getOrCreate()
+    spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
 
     # instanciation de la classe Transform
     transform = Transform(spark)
@@ -105,4 +108,4 @@ if __name__ == "__main__" :
     
     # transformation des données 
     transform.transform_tweet_info()
-    transform.transform_user_info(extract._user)
+    transform.transform_user_info(extract._user) 
