@@ -73,7 +73,7 @@ class Transform :
         # tweet_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
         
         logger.debug("Enregistrement du DataFrame tweet au format csv effectué") 
-          
+
             
     def transform_user_info(self, user) : 
         
