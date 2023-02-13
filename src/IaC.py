@@ -60,7 +60,7 @@ class IaC:
         
         self._myClusterProps = None
         
-        self._bucket_name = "ghiles-data-football" 
+        self._bucket_name="ghiles-data-foot" 
         
         logger.debug("cration des clients pour accéder aux services AWS")
 

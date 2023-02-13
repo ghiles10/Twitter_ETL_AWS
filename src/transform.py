@@ -29,6 +29,7 @@ class Transform :
         self._load_path = "s3://ghiles-data-foot/raw_data"
         self._save_path = "s3://ghiles-data-foot/processed_data"
     
+    
     def download_data(self,iac) :   
         """ this function is used to download the data from s3"""
         
@@ -39,12 +40,13 @@ class Transform :
             file_name = os.path.join("src/data/raw_data", o.key.split("/")[-1])
             my_bucket.download_file(o.key, file_name)
     
+    
     def transform_tweet_info(self) : 
         
         """  transformation du fichier TWEET_INFO.csv  """
         
         # chargement du fichier TWEET_INFO.csv et suppression des caractères spéciaux
-        tweet_df = self._spark.read.csv( "src/data/raw_data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
+        tweet_df = self._spark.read.csv( f"{Path(__file__).parent}/data/raw_data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "[^a-zA-Z\\s]", "")) \
                .withColumn("text", regexp_replace("text", "^@\\w+", "")) 
         
@@ -66,10 +68,10 @@ class Transform :
         
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
-        # Enregistrement du DataFrame au format Parquet sur S3 
-        tweet_df.coalesce(1).write.csv( "src/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
+        # Enregistrement du DataFrame csv
+        tweet_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
         
-        logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué") 
+        logger.debug("Enregistrement du DataFrame tweet au format csv effectué") 
           
             
     def transform_user_info(self, user) : 
@@ -78,7 +80,7 @@ class Transform :
         
         
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
-        user_df = self._spark.read.csv( "src/data/raw_data" + '/USER_INFO.csv', header=True, inferSchema=True) 
+        user_df = self._spark.read.csv( f"{Path(__file__).parent}/data/raw_data" + '/USER_INFO.csv', header=True, inferSchema=True) 
         user_activity = self._spark.read.csv( "src/data/raw_data"  + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
            
         # transformation date
@@ -102,13 +104,32 @@ class Transform :
         
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
-        #enregistrement du dataframe au format parquet sur S3 
-        user_df.coalesce(1).write.csv( "src/data/processed_data/user", sep = ',', header=True, mode ="overwrite" )
+        #enregistrement du dataframe au format csv
+        user_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/user", sep = ',', header=True, mode ="overwrite" )
         
-        logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué")
+        logger.debug("Enregistrement du DataFrame au format user csv  effectué")
+        
+        
+    def send_to_s3(self, iac) : 
+        
+        """ this function is used to send the processed data to s3 """
+        
+        csv_files = []
+        for root, _, files in os.walk(f"{Path(__file__).parent}/data/processed_data"):
+            for file in files:
+                if file.endswith(".csv"):
+                    csv_files.append(os.path.join(root, file))
+        
+        # upload the file to S3
+        for file in csv_files: 
+            iac._s3.Bucket( iac._bucket_name ).put_object(Key="processed_data/" + file, Body=open(file, 'rb'))
+            
+            logger.debug(f"upload {file} file to s3 for user infos")
+
         
 if __name__ == "__main__" : 
     
+    # pass
     spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
 
     # instanciation de la classe Transform
@@ -124,3 +145,6 @@ if __name__ == "__main__" :
     # transformation des données 
     transform.transform_tweet_info()
     transform.transform_user_info(extract) 
+
+    # envoi des données au format csv vers s3
+    transform.send_to_s3(iac)
