@@ -2,13 +2,16 @@ import configparser
 from pathlib import Path
 import log_config
 from pyspark.ml.feature import StopWordsRemover
-from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_timestamp, current_timestamp
+from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_timestamp, current_timestamp, lit
 import extract 
 from pyspark.sql import SparkSession
 import os 
 from IaC import IaC
 
+
+# creating folder for storign data
 if not os.path.exists("src/data"):
+    
     os.makedirs("src/data/raw_data")
     os.makedirs("src/data/processed_data")
 
@@ -53,14 +56,14 @@ class Transform :
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "http\\S+", "")) 
         
         # Séparation de la colonne date et heure en deux colonnes
-        tweet_df = tweet_df.withColumn("date", substring(tweet_df["date_creation"], 0, 10)) \
-            .withColumn("time", substring(tweet_df["date_creation"], 11, 19))
+        tweet_df = tweet_df.withColumn("date", substring(tweet_df["date_creation"], 0, 10)) 
+            # .withColumn("time", substring(tweet_df["date_creation"], 11, 19))
         
         # Transformation de la colonne "date" en format de date
         tweet_df = tweet_df.withColumn("date", to_date(tweet_df["date"], "yyyy-MM-dd"))
 
         # Transformation de la colonne "time" en format d'heure
-        tweet_df = tweet_df.withColumn("time", to_timestamp(tweet_df["time"], "HH:mm:ss"))
+        # tweet_df = tweet_df.withColumn("time", to_timestamp(tweet_df["time"], "HH:mm:ss"))
         
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
@@ -77,18 +80,24 @@ class Transform :
         
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
         user_df = self._spark.read.csv( "src/data/raw_data" + '/TWEET_INFO.csv', header=True, inferSchema=True) 
-        user_activity = self._spark.read.csv( self._load_path + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
+        user_activity = self._spark.read.csv( "src/data/raw_data"  + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
            
         # transformation date
         user_df = user_df.withColumn("date_creation", substring(user_df["date_creation"], 0, 10))
-        user_df = user_df.withColumn("date_creation", to_date(user_df["date_creation"], "yyyy-MM-dd"))
+        # user_df = user_df.withColumn("date_creation", to_date(user_df["date_creation"], "yyyy-MM-dd"))
         
         # ajouter la date du jour afin de faciliter le suivi des utilisateurs
         user_df = user_df.withColumn("date", to_date(current_timestamp())) 
                 
         # join des deux dataframes 
-        user_df = user_df.withColumn("favorite_count", user_activity["favorite_count"])
-        user_df = user_df.withColumn("retweet_count", user_activity["retweet_count"])
+        
+        df_pandas = user_activity.toPandas()
+        retweet_count = df_pandas["retweet_count"].values[0]
+        favorite_count = df_pandas["favorite_count"].values[0]
+        print(f'{retweet_count}---------------------------------------')
+        
+        user_df = user_df.withColumn("retweet_count", lit(retweet_count))
+        user_df = user_df.withColumn("favorite_count", lit(favorite_count))
         
         # ajout colonne user 
         user_df = user_df.withColumn("user", user._user_name)
@@ -116,4 +125,4 @@ if __name__ == "__main__" :
     
     # transformation des données 
     transform.transform_tweet_info()
-    transform.transform_user_info(extract._user) 
+    transform.transform_user_info(extract.user_name) 
