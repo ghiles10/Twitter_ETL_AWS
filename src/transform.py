@@ -6,9 +6,11 @@ from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_
 import extract 
 from pyspark.sql import SparkSession
 import os 
+from IaC import IaC
 
 if not os.path.exists("src/data"):
-    os.mkdir("src/data")
+    os.makedirs("src/data/raw_data")
+    os.makedirs("src/data/processed_data")
 
 # récupération des paramètres de configuration dans le fichier config.cfg
 config = configparser.ConfigParser()
@@ -25,25 +27,27 @@ class Transform :
         self._load_path = "s3://ghiles-data-foot/raw_data"
         self._save_path = "s3://ghiles-data-foot/processed_data"
     
-    def download_data(self,s3) :   
+    def download_data(self,iac) :   
+        """ this function is used to download the data from s3"""
         
+        # copie des fichiers s3 
+        my_bucket = iac._s3.Bucket("ghiles-data-foot")
+        
+        for o in my_bucket.objects.filter(Prefix='raw_data'):
+            file_name = os.path.join("src/data/raw_data", o.key.split("/")[-1])
+            my_bucket.download_file(o.key, file_name)
     
     def transform_tweet_info(self) : 
         
         """  transformation du fichier TWEET_INFO.csv  """
         
         # chargement du fichier TWEET_INFO.csv et suppression des caractères spéciaux
-        tweet_df = self._spark.read.csv( "src/data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
+        tweet_df = self._spark.read.csv( "src/data/raw_data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "[^a-zA-Z\\s]", "")) \
-               .withColumn("text", regexp_replace("text", "^@\\w+", ""))
+               .withColumn("text", regexp_replace("text", "^@\\w+", "")) 
         
-        # conversion en minuscule 
         # Conversion en minuscules
         tweet_df = tweet_df.withColumn("text", lower(tweet_df["text"])) 
-    
-        # Suppression des stop words
-        remover = StopWordsRemover(inputCol="text", outputCol="text")
-        tweet_df = remover.transform(tweet_df)
         
         # Suppression des URL
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "http\\S+", "")) 
@@ -61,9 +65,9 @@ class Transform :
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
         # Enregistrement du DataFrame au format Parquet sur S3 
-        tweet_df.write.parquet( "src/data/TWEET_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"]) 
+        tweet_df.write.csv( "src/data/processed_data", mode="overwrite", sep = ',', header=True) 
         
-        logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué") 
+        logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué") 
           
             
     def transform_user_info(self, user) : 
@@ -72,7 +76,7 @@ class Transform :
         
         
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
-        user_df = self._spark.read.csv( "src/data" + '/TWEET_INFO.csv', header=True, inferSchema=True) 
+        user_df = self._spark.read.csv( "src/data/raw_data" + '/TWEET_INFO.csv', header=True, inferSchema=True) 
         user_activity = self._spark.read.csv( self._load_path + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
            
         # transformation date
@@ -92,9 +96,9 @@ class Transform :
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format parquet sur S3 
-        user_df.write.parquet( "src/data/USER_DF.parquet", mode="overwrite", compression="snappy", partitionBy=["date"])
+        user_df.write.csv( "src/data/processed_data", mode="overwrite", sep = ',', header=True)
         
-        logger.debug("Enregistrement du DataFrame au format Parquet sur S3 effectué")
+        logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué")
         
 if __name__ == "__main__" : 
     
@@ -102,6 +106,10 @@ if __name__ == "__main__" :
 
     # instanciation de la classe Transform
     transform = Transform(spark)
+    
+    # telechargement des fichiers 
+    iac = IaC()
+    transform.download_data(iac)
     
     # instanciation de la classe Extract
     extract = extract.Extract()
