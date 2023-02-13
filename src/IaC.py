@@ -9,7 +9,6 @@ import log_config
 # logging
 logger = log_config.logger
 
-
 # récupération des paramètres de configuration dans le fichier config.cfg
 
 config = configparser.ConfigParser()
@@ -61,6 +60,8 @@ class IaC:
         self._myClusterProps = None
         
         self._bucket_name="ghiles-data-foot" 
+        
+        self._conn = None
         
         logger.debug("cration des clients pour accéder aux services AWS")
 
@@ -175,7 +176,7 @@ class IaC:
         self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
         DWH_ENDPOINT = self._myClusterProps['Endpoint']['Address']
         
-        conn = psycopg2.connect(
+        self._conn = psycopg2.connect(
             host= DWH_ENDPOINT,
             database= config.get("DWH","DWH_DB"),
             user= config.get("DWH","DWH_DB_USER"),
@@ -183,15 +184,14 @@ class IaC:
             port= config.get("DWH","DWH_PORT")
         )
 
-        cursor = conn.cursor()
+        cursor = self._conn.cursor()
         cursor.execute("SELECT version();")
         
         print('------------------------------------------ test ------------------------------------------')
         print(cursor.fetchone())
         
-        conn.close()
-        logger.debug(f" {cursor.fetchone()}")
-        logger.debug("test ok")
+        # self._conn.close()
+        logger.debug("test redshift ok")
         
 
     def clean_bucket(self):
@@ -201,12 +201,10 @@ class IaC:
         logger.debug(f"Cleaning bucket : {self._bucket_name }")
         self._s3.Bucket(self._bucket_name ).objects.all().delete()
 
-if __name__ == '__main__' : 
     
-    iac = IaC()
-    # iac.create_bucket()
-    # iac.create_cluster()
-    # iac.open_port()
-    # iac.verify_cluster_status()
-    
-    
+# iac = IaC()
+# iac.create_bucket()
+# iac.create_cluster()
+# iac.open_port()
+# iac.verify_cluster_status()
+
