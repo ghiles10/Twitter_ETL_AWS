@@ -103,7 +103,7 @@ class Transform :
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format parquet sur S3 
-        user_df.write.csv( "src/data/processed_data/user.csv", sep = ',', header=True)
+        user_df.write.mode("overwrite").csv( "src/data/processed_data/user.csv", sep = ',', header=True)
         
         logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué")
         
