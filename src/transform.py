@@ -1,8 +1,7 @@
 import configparser
 from pathlib import Path
 import log_config
-from pyspark.ml.feature import StopWordsRemover
-from pyspark.sql.functions import regexp_replace, substring, lower, to_date, to_timestamp, current_timestamp, lit
+from pyspark.sql.functions import regexp_replace, substring, lower, to_date, current_timestamp, lit
 import extract 
 from pyspark.sql import SparkSession
 import os 
@@ -68,7 +67,7 @@ class Transform :
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
         # Enregistrement du DataFrame au format Parquet sur S3 
-        tweet_df.write.csv( "src/data/processed_data", mode="overwrite", sep = ',', header=True) 
+        tweet_df.write.csv( "src/data/processed_data/tweet.csv", sep = ',', header=True) 
         
         logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué") 
           
@@ -79,7 +78,7 @@ class Transform :
         
         
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
-        user_df = self._spark.read.csv( "src/data/raw_data" + '/TWEET_INFO.csv', header=True, inferSchema=True) 
+        user_df = self._spark.read.csv( "src/data/raw_data" + '/USER_INFO.csv', header=True, inferSchema=True) 
         user_activity = self._spark.read.csv( "src/data/raw_data"  + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
            
         # transformation date
@@ -92,20 +91,19 @@ class Transform :
         # join des deux dataframes 
         
         df_pandas = user_activity.toPandas()
-        retweet_count = df_pandas["retweet_count"].values[0]
-        favorite_count = df_pandas["favorite_count"].values[0]
-        print(f'{retweet_count}---------------------------------------')
+        retweet_count = int(df_pandas["retweet_count"].values[0])
+        favorite_count = int(df_pandas["favorite_count"].values[0])
         
         user_df = user_df.withColumn("retweet_count", lit(retweet_count))
         user_df = user_df.withColumn("favorite_count", lit(favorite_count))
         
         # ajout colonne user 
-        user_df = user_df.withColumn("user", user._user_name)
+        user_df = user_df.withColumn("user", lit(user.user_name))
         
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format parquet sur S3 
-        user_df.write.csv( "src/data/processed_data", mode="overwrite", sep = ',', header=True)
+        user_df.write.csv( "src/data/processed_data/user.csv", sep = ',', header=True)
         
         logger.debug("Enregistrement du DataFrame au format csv sur S3 effectué")
         
@@ -125,4 +123,4 @@ if __name__ == "__main__" :
     
     # transformation des données 
     transform.transform_tweet_info()
-    transform.transform_user_info(extract.user_name) 
+    transform.transform_user_info(extract) 

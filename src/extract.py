@@ -20,7 +20,7 @@ class Extract :
     def __init__(self) :
         
         self._infos = None 
-        self.user_name = None 
+        self.user_name = "elonmusk" 
     
     def extract_tweet(self)  : 
 
