@@ -4,7 +4,7 @@ import json
 import psycopg2
 from pathlib import Path
 import botocore.exceptions
-import log_config
+from src import log_config
 
 # logging
 logger = log_config.logger
@@ -211,10 +211,10 @@ class IaC:
         
         logger.debug(f"Bucket cleaned : {self._bucket_name }")
 
-    
-# iac = IaC()
-# iac.create_bucket()
-# iac.create_cluster()
-# iac.open_port()
-# iac.verify_cluster_status()
+
+iac = IaC()
+iac.create_bucket()
+iac.create_cluster()
+iac.open_port()
+iac.verify_cluster_status()
 

@@ -84,7 +84,7 @@ class UpsertDataWarehouse():
         if len(rows) > 0:
             logger.debug("Data inserted in tweets ")
         else : 
-        logger.debug('data not inserted in tweets')
+            logger.debug('data not inserted in tweets')
             
 if __name__ == "__main__":
     
