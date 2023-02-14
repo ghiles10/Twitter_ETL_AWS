@@ -208,6 +208,8 @@ class IaC:
         """
         logger.debug(f"Cleaning bucket : {self._bucket_name }")
         self._s3.Bucket(self._bucket_name ).objects.all().delete()
+        
+        logger.debug(f"Bucket cleaned : {self._bucket_name }")
 
     
 # iac = IaC()

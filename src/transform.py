@@ -69,7 +69,7 @@ class Transform :
         logger.debug("Transformation du fichier TWEET_INFO.csv effectuée")
         
         # Enregistrement du DataFrame csv
-        tweet_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/tweet.csv", index=False)
+        tweet_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/tweet.csv", index=False, sep='|')
         # tweet_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/tweet", sep = ',', header=True, mode ="overwrite") 
         
         logger.debug("Enregistrement du DataFrame tweet au format csv effectué") 
@@ -106,7 +106,7 @@ class Transform :
         logger.debug("Transformation du fichier USER_INFO.csv effectuée") 
         
         #enregistrement du dataframe au format csv
-        user_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/user.csv", index=False)
+        user_df.toPandas().to_csv(f"{Path(__file__).parent}/data/processed_data/user.csv", index=False, sep='|')
         # user_df.coalesce(1).write.csv( f"{Path(__file__).parent}/data/processed_data/user", sep = ',', header=True, mode ="overwrite" )
         
         logger.debug("Enregistrement du DataFrame au format user csv  effectué")
@@ -137,22 +137,22 @@ class Transform :
         
 if __name__ == "__main__" : 
     
-    # # pass
-    # spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
+    # pass
+    spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
 
-    # # instanciation de la classe Transform
-    # transform = Transform(spark)
+    # instanciation de la classe Transform
+    transform = Transform(spark)
     
-    # # telechargement des fichiers 
-    # iac = IaC()
-    # transform.download_data(iac)
+    # telechargement des fichiers 
+    iac = IaC()
+    transform.download_data(iac)
     
-    # # instanciation de la classe Extract
-    # extract = extract.Extract()
+    # instanciation de la classe Extract
+    extract = extract.Extract()
     
-    # # transformation des données 
-    # transform.transform_tweet_info()
-    # transform.transform_user_info(extract) 
+    # transformation des données 
+    transform.transform_tweet_info()
+    transform.transform_user_info(extract) 
 
-    # # envoi des données au format csv vers s3
-    # transform.send_to_s3(iac)
+    # envoi des données au format csv vers s3
+    transform.send_to_s3(iac)
