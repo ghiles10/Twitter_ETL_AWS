@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS ghiles.tweets
 (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     text VARCHAR,
-    favorite_count INT,
-    retweet_count INT,
+    favorite_count VARCHAR,
+    retweet_count VARCHAR,
     date_creation VARCHAR,
     date VARCHAR
 )
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS ghiles.users
     description VARCHAR,
     following VARCHAR,
     followers VARCHAR, 
-    favorite_count INT,
-    retweet_count INT,
+    favorite_count VARCHAR,
+    retweet_count VARCHAR,
     date_creation VARCHAR,
     date VARCHAR
 )

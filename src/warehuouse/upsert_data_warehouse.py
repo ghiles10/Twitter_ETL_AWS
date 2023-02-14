@@ -65,7 +65,23 @@ class upsert_data_warehouse():
         """)       
          
         logger.debug("Data users inserted") 
-         
+        
+        logger.debug("verif data inserted")
+
+        # Exécuter la requête SELECT pour vérifier si les données ont été insérées
+        cur.execute("SELECT * FROM ghiles.users LIMIT 10;")
+
+        # Afficher les résultats
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            logger.debug("Data inserted in user ")
+            
+        cur.execute("SELECT * FROM ghiles.tweets LIMIT 10;")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            logger.debug("Data inserted in tweet ")
+        for row in rows: 
+            print(row)
 
 iac = IaC()
 iac.create_bucket()
