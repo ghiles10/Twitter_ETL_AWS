@@ -63,6 +63,8 @@ class IaC:
         
         self._conn = None
         
+        self._iam_role = None
+        
         logger.debug("cration des clients pour accéder aux services AWS")
 
     # création d'une bucket afin de stocker les données 
@@ -105,14 +107,18 @@ class IaC:
                 
         try : 
             self._iam.attach_role_policy(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"),
-                                PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+                                PolicyArn="arn:aws:iam::aws:policy/AmazonS3FullAccess"
                                 )
             logger.debug("Attaching Policy")
             
             roleArn = self._iam.get_role(RoleName=config.get("DWH", "DWH_IAM_ROLE_NAME"))['Role']['Arn']
+            self._iam_role = roleArn
+            
+            print('okkkkkkkkkkkkkkkkkkkkkk')
             logger.debug("Get the IAM role ARN")
             
         except Exception as e : 
+        
             pass
 
     # création du cluster Redshift 
@@ -136,8 +142,10 @@ class IaC:
                 )
                 
             logger.debug("création du cluster Redshift")
+
             
         except Exception as e :
+            print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
             print(e)
             
                 
