@@ -51,6 +51,11 @@ insert_data = PythonOperator(task_id='insert data to data warehouse',
                              dag = dag 
 ) 
 
+clean_s3_bucket = PythonOperator(task_id='clean s3 bucket',
+                                python_callable = iac.clean_bucket,
+                                dag = dag
+)
+
 end = DummyOperator(task_id='end_etl',  dag=dag)                       
 
-start >> wait_for_transform >> connect_to_data_warehouse >> insert_data >> end
+start >> wait_for_transform >> connect_to_data_warehouse >> insert_data >> clean_s3_bucket >> end

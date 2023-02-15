@@ -46,6 +46,8 @@ def get_last_date(ti, iac) :
 def read_api_data_compare_date(ti, spark) : 
     
     """ this function is used to compare the last date from the tweets table in redshift with the last date from the tweets table in s3 bukcet for tweet api """
+    
+    
     tweet_df = spark.read.csv( f"{Path(__file__).parent.parent }/src/data/raw_data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
     tweet_df = tweet_df.select("date_creation") 
     tweet_df = tweet_df.withColumn("date_creation", to_date(to_timestamp(col("date_creation"), "yyyy-MM-dd HH:mm:ss+00:00")))
