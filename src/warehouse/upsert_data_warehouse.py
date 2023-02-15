@@ -89,16 +89,15 @@ class UpsertDataWarehouse():
             logger.debug('data not inserted in tweets')
             
 
-    
 # create data warehouse
-iac = IaC()
-iac.create_bucket()
-iac.create_cluster()
-iac.open_port()
-iac.verify_cluster_status()
+# iac = IaC()
+# iac.create_bucket()
+# iac.create_cluster()
+# iac.open_port()
+# iac.verify_cluster_status()
 
-upsert = UpsertDataWarehouse()  
-upsert.connect_to_data_warehouse(iac) 
-upsert.insert_data(iac)
+# upsert = UpsertDataWarehouse()  
+# upsert.connect_to_data_warehouse(iac) 
+# upsert.insert_data(iac)
 
     

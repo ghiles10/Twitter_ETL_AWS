@@ -1,18 +1,12 @@
 import sys
 sys.path.append('.') # add path to package
-import datetime 
 from pathlib import Path
 from datetime import datetime, timedelta
-
-
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp, to_date, col,  max
-
-
 from dag_IaC import iac
 from src.transform import Transform
 from dag_extract import extract
-
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator,  BranchPythonOperator
@@ -113,7 +107,6 @@ compare_date =  BranchPythonOperator(
     op_kwargs={'iac': spark}, 
     python_callable=get_last_date
 )
-
 
 
 download_data = PythonOperator(task_id='download_data_from_s3',

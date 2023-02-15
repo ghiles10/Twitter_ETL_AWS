@@ -33,7 +33,6 @@ dag = DAG("extract_twitter_etl",
         )
 
 extract = Extract()
-iac= IaC()
 
 
 start = DummyOperator(task_id='Begin_execution',  dag=dag)
