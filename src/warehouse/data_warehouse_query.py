@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS ghiles.tweets
     text VARCHAR,
     favorite_count VARCHAR,
     retweet_count VARCHAR,
-    date_creation TIMESTAMP,
+    date_creation DATE,
     date DATE
 )
 SORTKEY (date_creation);
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS ghiles.users
     followers VARCHAR, 
     favorite_count VARCHAR,
     retweet_count VARCHAR,
-    date_creation TIMESTAMP,
+    date_creation DATE,
     date DATE
 )
 SORTKEY ("user");

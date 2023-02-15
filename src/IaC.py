@@ -147,9 +147,7 @@ class IaC:
         except Exception as e :
             print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR')
             print(e)
-            
-                
-
+                   
     def open_port(self) : 
         
         """ this function is used to open the port 5439 to access the cluster"""

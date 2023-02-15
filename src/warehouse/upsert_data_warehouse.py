@@ -1,8 +1,8 @@
 import sys
 sys.path.append('.') # add path to package
-from log_config import logger
+from src.warehouse.log_config import logger
 from src.IaC import IaC 
-from data_warehouse_query import create_tweet_table, create_user_table
+from src.warehouse.data_warehouse_query import create_tweet_table, create_user_table
 
 
 class UpsertDataWarehouse():
@@ -78,25 +78,27 @@ class UpsertDataWarehouse():
             logger.debug("Data inserted in users ")
         else : 
             logger.debug('data not inserted in users')
-            
+          
+        # Exécuter la requête SELECT pour vérifier si les données ont été insérées  
         cur.execute("SELECT * FROM ghiles.tweets LIMIT 10;")
         rows = cur.fetchall()
+   
         if len(rows) > 0:
             logger.debug("Data inserted in tweets ")
         else : 
             logger.debug('data not inserted in tweets')
             
-if __name__ == "__main__":
-    
-    # create data warehouse
-    iac = IaC()
-    iac.create_bucket()
-    iac.create_cluster()
-    iac.open_port()
-    iac.verify_cluster_status()
-    
-    upsert = UpsertDataWarehouse()  
-    upsert.connect_to_data_warehouse(iac) 
-    upsert.insert_data(iac)
 
-        
+    
+# create data warehouse
+iac = IaC()
+iac.create_bucket()
+iac.create_cluster()
+iac.open_port()
+iac.verify_cluster_status()
+
+upsert = UpsertDataWarehouse()  
+upsert.connect_to_data_warehouse(iac) 
+upsert.insert_data(iac)
+
+    
