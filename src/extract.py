@@ -191,9 +191,7 @@ class Extract :
         
       
 if __name__ == '__main__' : 
-    
-    pass 
-
+    pass
     # create instance of class Extract
     # extract = Extract() 
     # extract.extract_tweet()
@@ -201,28 +199,3 @@ if __name__ == '__main__' :
     # extract.tweet_info_to_csv_s3(iac)
     # extract.user_info_to_csv_s3(iac)
     # extract.user_activity_to_csv_s3(iac) 
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

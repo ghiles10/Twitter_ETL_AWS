@@ -199,7 +199,6 @@ class IaC:
         # self._conn.close()
         logger.debug("test redshift ok")
         
-
     def clean_bucket(self):
         """
         Clean the bucket
@@ -210,9 +209,9 @@ class IaC:
         logger.debug(f"Bucket cleaned : {self._bucket_name }")
 
 
-iac = IaC()
-iac.create_bucket()
-iac.create_cluster()
-iac.open_port()
-iac.verify_cluster_status()
+# iac = IaC()
+# iac.create_bucket()
+# iac.create_cluster()
+# iac.open_port()
+# iac.verify_cluster_status()
 

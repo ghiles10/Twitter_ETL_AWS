@@ -2,7 +2,7 @@ import configparser
 from pathlib import Path
 import log_config
 from pyspark.sql.functions import regexp_replace, substring, lower, to_date, current_timestamp, lit
-import extract 
+from src import extract 
 from pyspark.sql import SparkSession
 import os 
 from IaC import IaC
@@ -138,21 +138,21 @@ class Transform :
 if __name__ == "__main__" : 
     
     # pass
-    spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
+    # spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
 
-    # instanciation de la classe Transform
-    transform = Transform(spark)
+    # # instanciation de la classe Transform
+    # transform = Transform(spark)
     
-    # telechargement des fichiers 
-    iac = IaC()
-    transform.download_data(iac)
+    # # telechargement des fichiers 
+    # iac = IaC()
+    # transform.download_data(iac)
     
-    # instanciation de la classe Extract
-    extract = extract.Extract()
+    # # instanciation de la classe Extract
+    # extract = extract.Extract()
     
-    # transformation des données 
-    transform.transform_tweet_info()
-    transform.transform_user_info(extract) 
+    # # transformation des données 
+    # transform.transform_tweet_info()
+    # transform.transform_user_info(extract) 
 
-    # envoi des données au format csv vers s3
-    transform.send_to_s3(iac)
+    # # envoi des données au format csv vers s3
+    # transform.send_to_s3(iac)
