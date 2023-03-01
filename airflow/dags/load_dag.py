@@ -1,5 +1,3 @@
-import sys
-sys.path.append('.') # add path to package
 from datetime import datetime, timedelta
 from dag_IaC import iac
 from src.warehouse.upsert_data_warehouse import UpsertDataWarehouse

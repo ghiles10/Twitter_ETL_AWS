@@ -5,10 +5,10 @@ print(sys.path)
 import configparser
 from pathlib import Path
 import tweepy
-import log_config
+import src.log_config
 import csv
 import io
-from IaC import IaC 
+from src.IaC import IaC 
 
 # récupération des paramètres de configuration dans le fichier config.cfg
 config = configparser.ConfigParser()
@@ -192,8 +192,6 @@ class Extract :
         logger.debug("upload csv file to s3 for user infos for user activity")
         
         
-        
-      
 if __name__ == '__main__' : 
     # pass
     # create instance of class Extract

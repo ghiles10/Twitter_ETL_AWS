@@ -46,13 +46,13 @@ resource "aws_security_group" "allow_redshift_access" {
 
   name        = "etl-ghiles"
   description = "open the port 5439 to access the cluster"
-
+  vpc_id =       "0a8b2761ee7cb3869"
   ingress {
     from_port   = var.dwh_port
     to_port     = var.dwh_port
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    cidr_blocks = ["0.0.0.0/0"] 
+     }
 }
 
 resource "aws_redshift_cluster" "dwh_cluster" {

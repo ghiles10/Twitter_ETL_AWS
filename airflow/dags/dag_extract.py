@@ -1,6 +1,4 @@
-import sys
-sys.path.append('.') # add path to package 
-from src.extract import Extract 
+ from src.extract import Extract 
 from dag_IaC import iac
 from datetime import datetime, timedelta
 from airflow import DAG

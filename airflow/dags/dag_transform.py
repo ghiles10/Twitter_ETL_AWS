@@ -1,5 +1,3 @@
-import sys
-sys.path.append('.') # add path to package
 from pathlib import Path
 from datetime import datetime, timedelta
 from pyspark.sql import SparkSession
