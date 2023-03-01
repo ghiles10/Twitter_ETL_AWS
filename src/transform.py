@@ -2,7 +2,7 @@ import configparser
 from pathlib import Path
 import log_config
 from pyspark.sql.functions import regexp_replace, substring, lower, to_date, current_timestamp, lit
-from src import extract 
+import extract 
 from pyspark.sql import SparkSession
 import os 
 from IaC import IaC
@@ -46,7 +46,12 @@ class Transform :
         """  transformation du fichier TWEET_INFO.csv  """
         
         # chargement du fichier TWEET_INFO.csv et suppression des caractères spéciaux
-        tweet_df = self._spark.read.csv( f"{Path(__file__).parent}/data/raw_data" + '/TWEET_INFO.csv', header=True,inferSchema=True)
+        tweet_df = self._spark.read \
+            .option("header", "true") \
+            .option("delimiter", "|") \
+            .option("inferSchema", "true") \
+            .csv(f"{Path(__file__).parent}/data/raw_data/TWEET_INFO.csv")
+
         tweet_df = tweet_df.withColumn("text", regexp_replace("text", "[^a-zA-Z\\s]", "")) \
                .withColumn("text", regexp_replace("text", "^@\\w+", "")) 
         
@@ -81,8 +86,8 @@ class Transform :
         
         
         # chargement du fichier USER_INFO.csv et suppression des caractères spéciaux
-        user_df = self._spark.read.csv( f"{Path(__file__).parent}/data/raw_data" + '/USER_INFO.csv', header=True, inferSchema=True) 
-        user_activity = self._spark.read.csv( "src/data/raw_data"  + '/USER_ACTIVITY.csv', header=True, inferSchema=True)   
+        user_df = self._spark.read.csv( f"{Path(__file__).parent}/data/raw_data" + '/USER_INFO.csv', header=True, inferSchema=True, sep="|") 
+        user_activity = self._spark.read.csv( "src/data/raw_data"  + '/USER_ACTIVITY.csv', header=True, inferSchema=True, sep = "|")   
            
         # transformation date
         user_df = user_df.withColumn("date_creation", substring(user_df["date_creation"], 0, 10))
@@ -138,21 +143,21 @@ class Transform :
 if __name__ == "__main__" : 
     
     # pass
-    # spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
+    spark = SparkSession.builder.appName("data-ghiles").getOrCreate()
 
-    # # instanciation de la classe Transform
-    # transform = Transform(spark)
+    # instanciation de la classe Transform
+    transform = Transform(spark)
     
-    # # telechargement des fichiers 
-    # iac = IaC()
-    # transform.download_data(iac)
+    # telechargement des fichiers 
+    iac = IaC()
+    transform.download_data(iac)
     
-    # # instanciation de la classe Extract
-    # extract = extract.Extract()
+    # instanciation de la classe Extract
+    extract = extract.Extract()
     
-    # # transformation des données 
-    # transform.transform_tweet_info()
-    # transform.transform_user_info(extract) 
+    # transformation des données 
+    transform.transform_tweet_info()
+    transform.transform_user_info(extract) 
 
-    # # envoi des données au format csv vers s3
-    # transform.send_to_s3(iac)
+    # envoi des données au format csv vers s3
+    transform.send_to_s3(iac)

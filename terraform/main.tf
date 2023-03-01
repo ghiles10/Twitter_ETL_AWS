@@ -57,14 +57,15 @@ resource "aws_security_group" "allow_redshift_access" {
 
 resource "aws_redshift_cluster" "dwh_cluster" {
 
-  cluster_identifier  = "${var.dwh_cluster_identifier}"
-  database_name       = var.dwh_db
-  master_username     = var.master_username
-  master_password     = var.master_password
-  node_type           = var.dwh_node_type
-  cluster_type        = var.dwh_cluster_type
-  port                = var.dwh_port
-  skip_final_snapshot = true
-  iam_roles           = [aws_iam_role.redshift_iam_role.arn]
+  cluster_identifier      = "${var.dwh_cluster_identifier}"
+  database_name           = var.dwh_db
+  master_username         = var.master_username
+  master_password         = var.master_password
+  node_type               = var.dwh_node_type
+  cluster_type            = var.dwh_cluster_type
+  port                    = var.dwh_port
+  skip_final_snapshot     = true
+  iam_roles               = ["${aws_iam_role.redshift_iam_role.arn}"]
+  cluster_security_groups = ["${aws_security_group.allow_redshift_access.id}"]
 }
 

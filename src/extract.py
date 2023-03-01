@@ -1,3 +1,7 @@
+import sys
+sys.path.append('./src')
+print(sys.path)
+
 import configparser
 from pathlib import Path
 import tweepy
@@ -115,7 +119,7 @@ class Extract :
         csv_file = io.StringIO()
 
         # create the csv writer
-        writer = csv.writer(csv_file)
+        writer = csv.writer(csv_file,  delimiter='|')
         # write the header
         writer.writerow(column_names) 
         # write data 
@@ -145,7 +149,7 @@ class Extract :
         # create a file-like buffer to receive CSV data
         csv_file = io.StringIO()
         # create the csv writer
-        writer = csv.writer(csv_file)
+        writer = csv.writer(csv_file, delimiter='|')
         # write the header
         writer.writerow(column_names)      
         # write data 
@@ -175,7 +179,7 @@ class Extract :
         # create a file-like buffer to receive CSV data
         csv_file = io.StringIO()
         # create the csv writer
-        writer = csv.writer(csv_file)
+        writer = csv.writer(csv_file, delimiter='|')
         # write the header
         writer.writerow(column_names)      
         # write data 
@@ -191,11 +195,11 @@ class Extract :
         
       
 if __name__ == '__main__' : 
-    pass
+    # pass
     # create instance of class Extract
-    # extract = Extract() 
-    # extract.extract_tweet()
-    # iac= IaC()
-    # extract.tweet_info_to_csv_s3(iac)
-    # extract.user_info_to_csv_s3(iac)
-    # extract.user_activity_to_csv_s3(iac) 
+    extract = Extract() 
+    extract.extract_tweet()
+    iac= IaC()
+    extract.tweet_info_to_csv_s3(iac)
+    extract.user_info_to_csv_s3(iac)
+    extract.user_activity_to_csv_s3(iac)

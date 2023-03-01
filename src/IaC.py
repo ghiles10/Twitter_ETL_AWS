@@ -4,7 +4,8 @@ import json
 import psycopg2
 from pathlib import Path
 import botocore.exceptions
-from src import log_config
+import log_config
+import os 
 
 # logging
 logger = log_config.logger
@@ -45,8 +46,8 @@ class IaC:
 
         self._redshift = boto3.client('redshift',
                         region_name="eu-west-3",
-                        aws_access_key_id=self.KEY,
-                        aws_secret_access_key=self.SECRET
+                        aws_access_key_id= os.environ.get('AWS_ACCESS_KEY_ID'),
+                        aws_secret_access_key= os.environ.get('AWS_SECRET_ACCESS_KEY')
                         )
         
         # Créer un client EMR
@@ -179,8 +180,9 @@ class IaC:
         
         """ this function is used to verify the status of the cluster """
         
-        self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
-        DWH_ENDPOINT = self._myClusterProps['Endpoint']['Address']
+        # self._myClusterProps = self._redshift.describe_clusters(ClusterIdentifier=config.get("DWH","DWH_CLUSTER_IDENTIFIER"))['Clusters'][0]
+        DWH_ENDPOINT = os.environ.get("DWH_ENDPOINT") 
+        
         
         self._conn = psycopg2.connect(
             host= DWH_ENDPOINT,

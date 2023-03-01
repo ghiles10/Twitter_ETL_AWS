@@ -1,5 +1,6 @@
 import sys
 sys.path.append('.') # add path to package
+
 from src.warehouse.log_config import logger
 from src.IaC import IaC 
 from src.warehouse.data_warehouse_query import create_tweet_table, create_user_table
@@ -15,7 +16,8 @@ class UpsertDataWarehouse():
         """ Connect to data warehouse and create tables"""
         
         # connect to data warehouse
-        conn = iac._conn
+        iac.verify_cluster_status()
+        conn = iac._conn 
         cur = conn.cursor()
         logger.debug("Connection to data warehouse")
         
@@ -90,14 +92,11 @@ class UpsertDataWarehouse():
             
 
 # create data warehouse
-# iac = IaC()
-# iac.create_bucket()
-# iac.create_cluster()
-# iac.open_port()
-# iac.verify_cluster_status()
+iac = IaC()
 
-# upsert = UpsertDataWarehouse()  
-# upsert.connect_to_data_warehouse(iac) 
-# upsert.insert_data(iac)
+
+upsert = UpsertDataWarehouse()  
+upsert.connect_to_data_warehouse(iac) 
+upsert.insert_data(iac)
 
     

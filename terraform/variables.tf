@@ -13,7 +13,7 @@ variable "bucket_backend" {
 variable "bucket_name" {
   description = "Bucket name"
   type        = string
-  default     = "data-lake-batch-etl"
+  default     = "ghiles-data-foot"
 }
 
 variable "vpc_cidr" {
