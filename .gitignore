@@ -8,6 +8,7 @@ __pycache__/
 
 # config 
 src/config.cfg
+terraform/terraform.tfstate 
 
 # Distribution / packaging
 .Python
