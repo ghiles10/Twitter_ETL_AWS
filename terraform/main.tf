@@ -1,48 +1,44 @@
 provider "aws" {
-  region     = var.aws_region
-  access_key = "AKIA3XSX7CC3O5UIBM7C"
-  secret_key = "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"
-} 
+  region = var.aws_region
+}
 
 terraform {
   backend "s3" {
     bucket = "terraform-backend-etl-ghiles"
     key    = "etl-ghiles.tfstate"
-    access_key = "AKIA3XSX7CC3O5UIBM7C"
-    secret_key = "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"
   }
 }
 
 # Data Lake s3 bucket 
 resource "aws_s3_bucket" "data_lake" {
-  bucket  = var.bucket_name
+  bucket        = var.bucket_name
   force_destroy = true
-} 
+}
 
 # IAM role for Redshift to be able to use S3 
 
-resource "aws_iam_role" "redshift_iam_role" { 
+resource "aws_iam_role" "redshift_iam_role" {
 
   name = var.redshift_iam_role
   assume_role_policy = jsonencode({
-    
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "sts:AssumeRole"
-            ],
-            "Principal": {
-                "Service": [
-                    "redshift.amazonaws.com"
-                ]
-            }
+
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "sts:AssumeRole"
+        ],
+        "Principal" : {
+          "Service" : [
+            "redshift.amazonaws.com"
+          ]
         }
+      }
     ]
-    
+
   })
-  managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]  
+  managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonS3FullAccess"]
 }
 
 # Redshift cluster open ports 
@@ -52,8 +48,8 @@ resource "aws_security_group" "allow_redshift_access" {
   description = "open the port 5439 to access the cluster"
 
   ingress {
-    from_port   = var.dwh_port 
-    to_port     = var.dwh_port 
+    from_port   = var.dwh_port
+    to_port     = var.dwh_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -61,14 +57,14 @@ resource "aws_security_group" "allow_redshift_access" {
 
 resource "aws_redshift_cluster" "dwh_cluster" {
 
-  cluster_identifier = "${var.dwh_cluster_identifier}"
-  database_name      = var.dwh_db
-  master_username    = var.master_username
-  master_password    = var.master_password
-  node_type          = var.dwh_node_type
-  cluster_type       = var.dwh_cluster_type
-  port = var.dwh_port 
-  skip_final_snapshot                 = true 
-  iam_roles = [ aws_iam_role.redshift_iam_role.arn]
+  cluster_identifier  = "${var.dwh_cluster_identifier}"
+  database_name       = var.dwh_db
+  master_username     = var.master_username
+  master_password     = var.master_password
+  node_type           = var.dwh_node_type
+  cluster_type        = var.dwh_cluster_type
+  port                = var.dwh_port
+  skip_final_snapshot = true
+  iam_roles           = [aws_iam_role.redshift_iam_role.arn]
 }
 
