@@ -1,8 +1,17 @@
 provider "aws" {
-  region     = "us-east-1"
-  access_key = "PUT YOUR OWN"
-  secret_key = "PUT YOUR OWN"
+  region     = var.aws_region
+  access_key = "AKIA3XSX7CC3O5UIBM7C"
+  secret_key = "qKop3H5uxN+2mzwpHe/fRb1D/rqkNbb8ZyhV6riu"
 } 
+
+terraform {
+  backend "s3" {
+    bucket = "terraform-backend-etl-ghiles"
+    key    = "etl-ghiles.tfstate"
+    access_key = "AKIA3XSX7CC3O5UIBM7C"
+    secret_key = "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"
+  }
+}
 
 # Data Lake s3 bucket 
 resource "aws_s3_bucket" "data_lake" {
@@ -14,7 +23,7 @@ resource "aws_s3_bucket" "data_lake" {
 
 resource "aws_iam_role" "redshift_iam_role" { 
 
-  name = "redshift_iam_role" 
+  name = var.redshift_iam_role
   assume_role_policy = jsonencode({
     
     "Version": "2012-10-17",
@@ -52,10 +61,14 @@ resource "aws_security_group" "allow_redshift_access" {
 
 resource "aws_redshift_cluster" "dwh_cluster" {
 
-  cluster_identifier = ${var.dwh_cluster_identifier}
-  database_name      = "mydb"
-  master_username    = "exampleuser"
-  master_password    = "Mustbe8characters"
-  node_type          = "dc1.large"
-  cluster_type       = "single-node"
+  cluster_identifier = "${var.dwh_cluster_identifier}"
+  database_name      = var.dwh_db
+  master_username    = var.master_username
+  master_password    = var.master_password
+  node_type          = var.dwh_node_type
+  cluster_type       = var.dwh_cluster_type
+  port = var.dwh_port 
+  skip_final_snapshot                 = true 
+  iam_roles = [ aws_iam_role.redshift_iam_role.arn]
 }
+
