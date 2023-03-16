@@ -47,4 +47,5 @@ Individual Airflow DAGs for each stage of the ETL pipeline, including data colle
 To install and run the project : 
 
 `make init`
+
 `make run`
