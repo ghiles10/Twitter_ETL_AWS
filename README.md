@@ -9,14 +9,17 @@ This project aims to create an ETL pipeline that retrieves data from the Twitter
 
 ## Tools & Technologies
 
-Cloud - AWS
-Infrastructure as Code software - Terraform, Python code 
-Containerization - Docker, Docker Compose
-Data Processing - PySpark 
-Orchestration - Airflow
-Data Lake - AWS S3
-Data Warehouse - AWS REDSHIFT 
-Language - Python 
+| Category                | Technology                 |
+|-------------------------|----------------------------|
+| Cloud                   | AWS                        |
+| Infrastructure as Code  | Terraform, Python code     |
+| Containerization        | Docker, Docker Compose     |
+| Data Processing         | PySpark                    |
+| Orchestration           | Airflow                    |
+| Data Lake               | AWS S3                     |
+| Data Warehouse          | AWS Redshift               |
+| Language                | Python                     |
+
 
 
 ## How it works 
