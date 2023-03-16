@@ -42,3 +42,9 @@ By using infrastructure as code, the deployment and management of the project's 
 
 ### Airflow Orchestration
 Individual Airflow DAGs for each stage of the ETL pipeline, including data collection, data processing, and data warehousing
+
+## Getting Started
+To install and run the project : 
+
+`make init`
+`make run`
