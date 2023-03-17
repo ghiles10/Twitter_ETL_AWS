@@ -24,6 +24,34 @@ This project aims to create an ETL pipeline that retrieves data from the Twitter
 
 ## How it works 
 
+### Setup 
+
+A `config.cfg` file is expected. Copy this example below : 
+
+[AWS]  
+KEY=
+ACCESS=
+
+[DWH]
+DWH_CLUSTER_TYPE=
+DWH_NUM_NODES=
+DWH_NODE_TYPE=
+
+DWH_CLUSTER_IDENTIFIER=
+DWH_DB=
+DWH_DB_USER=
+DWH_DB_PASSWORD=
+DWH_PORT=
+
+DWH_IAM_ROLE_NAME=
+
+[TWITTER] 
+USER_NAME=
+ACCES_KEY=
+ACCES_SECRET=
+CONSUMER_KEY=
+CONSUMER_SECRET= 
+
 ### Infrastructure as code 
 
 Terraform is used to provision and manage AWS services required for the pipeline. In addition to Terraform, a Python script is provided to create and manage infrastructure as code without relying on Terraform. This alternative approach offers flexibility in choosing the desired infrastructure management tool.
