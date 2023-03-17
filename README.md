@@ -51,6 +51,82 @@ ACCES_SECRET=
 CONSUMER_KEY=
 CONSUMER_SECRET= 
 ```
+if you are using `terraform`, `variables.tf` file is expected : 
+
+```ini
+variable "aws_region" {
+  description = "Aws region"
+  type        = string
+  default     = "eu-west-3"
+}
+
+variable "bucket_backend" {
+  description = "Bucket name"
+  type        = string
+  default     = ""
+}
+
+variable "bucket_name" {
+  description = "Bucket name"
+  type        = string
+  default     = "t"
+}
+
+variable "vpc_cidr" {
+  type    = string
+  default = ""
+}
+
+variable "dwh_port" {
+  type    = string
+  default = "5439"
+}
+
+variable "dwh_cluster_identifier" {
+  type    = string
+  default = ""
+}
+
+variable "dwh_db" {
+
+  type    = string
+  default = ""
+}
+
+variable "master_username" {
+  type    = string
+  default = ""
+
+}
+
+variable "master_password" {
+
+  type    = string
+  default = "!"
+}
+
+
+variable "redshift_iam_role" {
+  type    = string
+  default = ""
+}
+
+variable "dwh_node_type" {
+  type    = string
+  default = ""
+}
+
+variable "dwh_num_nodes" {
+  type    = string
+  default = ""
+}
+
+variable "dwh_cluster_type" {
+  type    = string
+  default = ""
+}
+
+```
 
 ### Infrastructure as code 
 
