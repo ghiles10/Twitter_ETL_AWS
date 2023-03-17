@@ -28,28 +28,43 @@ This project aims to create an ETL pipeline that retrieves data from the Twitter
 
 A `config.cfg` file is expected. Copy this example below : 
 
+```ini
 [AWS]  
+
 KEY=
+
 ACCESS=
 
 [DWH]
+
 DWH_CLUSTER_TYPE=
+
 DWH_NUM_NODES=
+
 DWH_NODE_TYPE=
 
 DWH_CLUSTER_IDENTIFIER=
+
 DWH_DB=
+
 DWH_DB_USER=
+
 DWH_DB_PASSWORD=
+
 DWH_PORT=
 
 DWH_IAM_ROLE_NAME=
 
 [TWITTER] 
+
 USER_NAME=
+
 ACCES_KEY=
+
 ACCES_SECRET=
+
 CONSUMER_KEY=
+
 CONSUMER_SECRET= 
 
 ### Infrastructure as code 
